@@ -1,0 +1,39 @@
+--// LocalScript: Delete GUI cực nhanh sau khi CandyFarm đã load
+task.spawn(function()
+    local CoreGui = game:GetService("CoreGui")
+    local PlayerGui = game:GetService("Players").LocalPlayer:WaitForChild("PlayerGui")
+
+    -- Hàm xoá GUI nếu phát hiện từ khoá cấm
+    local function tryDestroy(obj)
+        if not obj or not obj:IsDescendantOf(game) then return end
+
+        if obj:IsA("ScreenGui") or obj:IsA("Frame") or obj:IsA("TextLabel") or obj:IsA("TextButton") then
+            local name = (obj.Name or ""):lower()
+            local text = (obj.Text or ""):lower()
+            if name:find("somtank") or name:find("candy") or name:find("farm") or name:find("youtube") then
+                pcall(function() obj:Destroy() end)
+                return
+            end
+            if text:find("somtank") or text:find("candy") or text:find("farm") or text:find("youtube") then
+                pcall(function() obj:Destroy() end)
+                return
+            end
+        end
+    end
+
+    -- Xóa mọi GUI hiện có ngay khi chạy
+    for _, v in ipairs(CoreGui:GetDescendants()) do tryDestroy(v) end
+    for _, v in ipairs(PlayerGui:GetDescendants()) do tryDestroy(v) end
+
+    -- Theo dõi GUI mới được thêm và xoá lập tức
+    CoreGui.DescendantAdded:Connect(tryDestroy)
+    PlayerGui.DescendantAdded:Connect(tryDestroy)
+
+    -- Xóa cực nhanh trong 2 giây (0.000001s/lần)
+    local start = tick()
+    while tick() - start < 2 do
+        task.wait(0.000001)
+        for _, v in ipairs(CoreGui:GetDescendants()) do tryDestroy(v) end
+        for _, v in ipairs(PlayerGui:GetDescendants()) do tryDestroy(v) end
+    end
+end)
