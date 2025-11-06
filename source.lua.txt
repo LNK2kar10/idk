@@ -2205,16 +2205,16 @@ else
 end
 
 local function Maximise(Window)
-	Window.Controls.ToggleSize.ImageLabel.Image = "rbxassetid://71985250189593"
+	Window.Controls.ToggleSize.ImageLabel.Image = "rbxassetid://10137941941"
 	tween(Window, {Size = MainSize})
 	Window.Elements.Visible = true
 	Window.Navigation.Visible = true
 end
 
 local function Minimize(Window)
-	Window.Controls.ToggleSize.ImageLabel.Image = "rbxassetid://71985250189593"
-	Window.Elements.Visible = true
-	Window.Navigation.Visible = true
+	Window.Controls.ToggleSize.ImageLabel.Image = "rbxassetid://11036884234"
+	Window.Elements.Visible = false
+	Window.Navigation.Visible = false
 	tween(Window, {Size = MinSize})
 end
 
@@ -2224,7 +2224,7 @@ function Cat:CreateWindow(WindowSettings)
 	WindowSettings = Kwargify({
 		Name = "Cat UI Example Window",
 		Subtitle = "",
-		LogoID = "6031097225",
+		LogoID = "71985250189593",
 		LoadingEnabled = true,
 		LoadingTitle = "Cat Interface Suite",
 		LoadingSubtitle = "by Cat Sky",
@@ -2262,7 +2262,7 @@ function Cat:CreateWindow(WindowSettings)
 
 	Main.Title.Title.Text = WindowSettings.Name
 	Main.Title.subtitle.Text = WindowSettings.Subtitle
-	Main.Logo.Image = "rbxassetid://71985250189593" .. WindowSettings.LogoID
+	Main.Logo.Image = "rbxassetid://" .. WindowSettings.LogoID
 	Main.Visible = true
 	Main.BackgroundTransparency = 1
 	Main.Size = MainSize
@@ -6635,14 +6635,79 @@ function Cat:CreateWindow(WindowSettings)
 		end
 	end
 
-	Main.Controls.Close.ImageLabel.MouseButton1Click:Connect(function()
-		Hide(Main, Window.Bind, true)
-		dragBar.Visible = false
-		Window.State = false
-		if UserInputService.KeyboardEnabled == false then
-			CatUI.MobileSupport.Visible = true
-		end
-	end)
+	-- Ẩn nút Close và ToggleSize
+Main.Controls.Close.Visible = false
+Main.Controls.ToggleSize.Visible = false
+
+-- Tạo nút mới để toggle UI
+local ToggleButton = Instance.new("Frame")
+ToggleButton.Name = "UIToggle"
+ToggleButton.Size = UDim2.new(0, 40, 0, 40)  -- Kích thước hình vuông
+ToggleButton.Position = UDim2.new(1, -50, 0, 10)  -- Vị trí góc phải trên (có thể điều chỉnh)
+ToggleButton.BackgroundTransparency = 0.25
+ToggleButton.BackgroundColor3 = Color3.fromRGB(32, 30, 38)
+ToggleButton.Parent = Main.Controls
+
+-- Thêm UIStroke và ImageLabel cho nút
+local UIStroke = Instance.new("UIStroke")
+UIStroke.Color = Color3.fromRGB(64, 61, 76)
+UIStroke.Transparency = 0.5
+UIStroke.Parent = ToggleButton
+
+local ImageLabel = Instance.new("ImageLabel")
+ImageLabel.Size = UDim2.new(0, 24, 0, 24)
+ImageLabel.Position = UDim2.new(0.5, 0, 0.5, 0)
+ImageLabel.AnchorPoint = Vector2.new(0.5, 0.5)
+ImageLabel.Image = "rbxassetid://71985250189593"  -- Gán ID ảnh
+ImageLabel.ImageTransparency = 0.25
+ImageLabel.BackgroundTransparency = 1
+ImageLabel.Parent = ToggleButton
+
+-- Chèn fallback ngay ở đây (sau gán Image)
+if not ImageLabel:IsLoaded() then
+    warn("Image failed to load; using default.")
+    ImageLabel.Image = GetIcon("visibility", "Material")  -- Fallback
+end
+
+-- Tiếp tục với UICorner và các phần khác
+local UICorner = Instance.new("UICorner")
+UICorner.CornerRadius = UDim.new(0, 8)
+UICorner.Parent = ToggleButton
+
+-- ... (phần còn lại của mã)
+
+-- Thêm UICorner để làm hình vuông bo góc
+local UICorner = Instance.new("UICorner")
+UICorner.CornerRadius = UDim.new(0, 8)
+UICorner.Parent = ToggleButton
+
+-- Chức năng toggle UI
+ImageLabel.MouseButton1Click:Connect(function()
+    if Window.State then
+        Hide(Main, Window.Bind, true)
+        dragBar.Visible = false
+        Window.State = false
+        if UserInputService.KeyboardEnabled == false then
+            CatUI.MobileSupport.Visible = true
+        end
+    else
+        Unhide(Main, Window.CurrentTab)
+        dragBar.Visible = true
+        Window.State = true
+        CatUI.MobileSupport.Visible = false
+    end
+end)
+
+-- Hover effects
+ToggleButton.MouseEnter:Connect(function()
+    tween(UIStroke, {Color = Color3.fromRGB(87, 84, 104)})
+    tween(ImageLabel, {ImageColor3 = Color3.new(1,1,1)})
+end)
+ToggleButton.MouseLeave:Connect(function()
+    tween(UIStroke, {Color = Color3.fromRGB(64,61,76)})
+    tween(ImageLabel, {ImageColor3 = Color3.fromRGB(195,195,195)})
+end)
+
 	Main.Controls.Close["MouseEnter"]:Connect(function()
 		tween(Main.Controls.Close.ImageLabel, {ImageColor3 = Color3.new(1,1,1)})
 	end)
